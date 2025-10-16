@@ -1,6 +1,7 @@
+.git
 .gradle
 build
+target
+node_modules
 **/*.iml
-.idea
-.git
-.gitignore
+*.log

@@ -1,13 +1,19 @@
-# -------- build stage --------
-FROM gradle:8.10.2-jdk21 AS builder
+# ---------- Build stage ----------
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY . .
-RUN gradle clean bootJar --no-daemon
+# gradlew 실행권한 부여 후 JAR 빌드 (테스트는 스킵)
+RUN chmod +x gradlew && ./gradlew bootJar -x test
 
-# -------- run stage --------
+# ---------- Run stage ----------
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-ENV SPRING_PROFILES_ACTIVE=prod
-COPY --from=builder /app/build/libs/*.jar app.jar
+# build 단계에서 만든 JAR 복사
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# Render가 할당하는 포트를 앱이 사용하도록
+ENV PORT=8080
 EXPOSE 8080
-CMD ["sh","-c","java $JAVA_OPTS -jar app.jar"]
+
+# Spring Boot의 server.port를 Render의 $PORT로 바인딩
+CMD ["bash", "-lc", "java -Dserver.port=${PORT} -jar /app/app.jar"]
