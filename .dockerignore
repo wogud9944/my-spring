@@ -1,7 +1,0 @@
-.git
-.gradle
-build
-target
-node_modules
-**/*.iml
-*.log
